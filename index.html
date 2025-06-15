@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>ML OCR Tool</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .controls {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .controls input[type=\"text\"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .controls button {
+            padding: 5px 10px;
+            border: 1px solid #007bff;
+            background-color: #007bff;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            /* Prevent scrollbars on body */
+        }
+
+        .image-pane {
+            position: relative; /* For absolute positioning of imageInfo */
+        }
+        .image-pane,
+
+        .result-pane {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            /* Allow scrolling within panes */
+            border-left: 1px solid #ccc;
+        }
+
+        .image-pane:first-child {
+            border-left: none;
+        }
+
+        .image-pane img {
+            width: 100%; /* Fill width */
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+            margin-bottom: 50px; /* Space for imageInfo */
+        }
+
+        #imagePlaceholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .info {
+            font-size: 0.9em;
+            color: #555;
+        }
+        #imageInfo {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid #ccc;
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+
+        #ocrResult {
+            white-space: pre-wrap;
+            /* Preserve whitespace and newlines */
+            word-wrap: break-word;
+            /* Break long words */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <label for="server">服务器地址:</label>
+        <input type="text" id="server" value="http://127.0.0.1:1224">
+        <label for="dir">图片根目录:</label>
+        <input type="text" id="dir" placeholder="点击选择或拖拽文件夹到此处" readonly>
+        <button id="selectDirBtn">选择文件夹</button>
+        <label for="imgName">图片名称:</label>
+        <input type="text" id="imgName" value="ML.tiff">
+        <button id="startBtn">开始识别</button>
+        <button id="nextBtn" style="display: none;">下一张</button>
+        <div class="info" id="progressInfo"></div>
+    </div>
+    <div class="content">
+        <div class="image-pane">
+            <h2>图片预览</h2>
+            <div id="imagePlaceholder">请先选择图片目录并开始识别</div>
+            <img id="currentImage" src="" alt="当前图片" style="display: none;">
+            <div class="info" id="imageInfo" style="display: none;"></div>
+        </div>
+        <div class="result-pane">
+            <h2>识别结果</h2>
+            <pre id="ocrResult"></pre>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,56 @@
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const path = require('path'); // Import path module
+
+function createWindow () {
+  const win = new BrowserWindow({
+    fullscreen: true, // Open in fullscreen by default
+    width: 1200, // Increased width
+    height: 800, // Increased height
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: true, // Recommended for security
+      enableRemoteModule: false, // Recommended to keep false for security
+      preload: path.join(__dirname, 'preload.js') // Add preload script
+    }
+  })
+
+  win.loadFile('index.html')
+  win.webContents.openDevTools() // Uncomment to open DevTools by default
+}
+
+ipcMain.handle('dialog:openDirectory', async () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (!focusedWindow) {
+    console.error('dialog:openDirectory - 无可用焦点窗口');
+    return null; // 或者可以抛出错误，让渲染进程捕获
+  }
+  try {
+    const { canceled, filePaths } = await dialog.showOpenDialog(focusedWindow, {
+      properties: ['openDirectory']
+    });
+    if (canceled || !filePaths || filePaths.length === 0) {
+      return null; // 用户取消或未选择文件路径
+    } else {
+      return filePaths[0];
+    }
+  } catch (error) {
+    console.error('dialog:openDirectory - 打开对话框时出错:', error);
+    return null; // 或抛出错误
+  }
+});
+
+app.whenReady().then(() => {
+  createWindow()
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    }
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
