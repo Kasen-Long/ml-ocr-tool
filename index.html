@@ -36,6 +36,17 @@
             cursor: pointer;
         }
 
+        .export {
+            padding: 5px 10px;
+            border: 1px solid #008800;
+            background-color: #008800;
+            margin-top: 12px;
+            width: 200px;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
         .controls button:hover {
             background-color: #0056b3;
         }
@@ -48,8 +59,10 @@
         }
 
         .image-pane {
-            position: relative; /* For absolute positioning of imageInfo */
+            position: relative;
+            /* For absolute positioning of imageInfo */
         }
+
         .image-pane,
 
         .result-pane {
@@ -65,10 +78,11 @@
         }
 
         .image-pane img {
-            width: 100%; /* Fill width */
-            height: auto; /* Maintain aspect ratio */
+            height: auto;
+            max-height: calc(100vh - 200px);
             display: block;
-            margin-bottom: 50px; /* Space for imageInfo */
+            margin: 0 auto;
+            margin-bottom: 50px;
         }
 
         #imagePlaceholder {
@@ -84,6 +98,7 @@
             font-size: 0.9em;
             color: #555;
         }
+
         #imageInfo {
             position: absolute;
             bottom: 0;
@@ -92,7 +107,8 @@
             padding: 10px;
             background-color: rgba(255, 255, 255, 0.9);
             border-top: 1px solid #ccc;
-            box-sizing: border-box; /* Include padding in width/height */
+            box-sizing: border-box;
+            /* Include padding in width/height */
         }
 
         #ocrResult {
@@ -101,6 +117,37 @@
             word-wrap: break-word;
             /* Break long words */
         }
+
+        .warning-bg {
+            background: orange !important;
+        }
+
+        .error-bg {
+            background: red !important;
+        }
+
+        .critical-bg {
+            background: purple !important;
+        }
+
+        .delete-btn,
+        .add-btn {
+            padding: 2px 5px;
+            margin: 0 2px;
+            cursor: pointer;
+            display: inline;
+        }
+        #ocrResult th,
+        #ocrResult tr,
+        #ocrResult td {
+            border: 1px solid #333;
+        }
+        #ocrResult tr td:first-child {
+            display: flex;
+            align-items: center;
+            height: 40px;
+        }
+
     </style>
 </head>
 
@@ -108,6 +155,8 @@
     <div class="controls">
         <label for="server">服务器地址:</label>
         <input type="text" id="server" value="http://127.0.0.1:1224">
+        <label for="pici">批次号:</label>
+        <input type="text" id="pici" value="CK-2025-0">
         <label for="dir">图片根目录:</label>
         <input type="text" id="dir" placeholder="点击选择或拖拽文件夹到此处" readonly>
         <button id="selectDirBtn">选择文件夹</button>
@@ -126,6 +175,14 @@
         </div>
         <div class="result-pane">
             <h2>识别结果</h2>
+            <div class="controls">
+                <label for="year">年度:</label>
+                <input type="text" id="year" />
+                <label for="anjuanhao">案卷号:</label>
+                <input type="text" id="anjuanhao" />
+                <label for="juanci">卷次:</label>
+                <input type="text" id="juanci" />
+            </div>
             <pre id="ocrResult"></pre>
         </div>
     </div>

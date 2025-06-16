@@ -3,19 +3,20 @@ const path = require('path'); // Import path module
 
 function createWindow () {
   const win = new BrowserWindow({
-    fullscreen: true, // Open in fullscreen by default
-    width: 1200, // Increased width
-    height: 800, // Increased height
+    fullscreen: false, // 关闭全屏模式
+    width: 1200,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: true, // Recommended for security
-      enableRemoteModule: false, // Recommended to keep false for security
-      preload: path.join(__dirname, 'preload.js') // Add preload script
+      contextIsolation: true,
+      enableRemoteModule: false,
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
+  win.maximize() // 添加窗口最大化命令
   win.loadFile('index.html')
-  win.webContents.openDevTools() // Uncomment to open DevTools by default
+  // win.webContents.openDevTools() // Uncomment to open DevTools by default
 }
 
 ipcMain.handle('dialog:openDirectory', async () => {

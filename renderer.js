@@ -2,6 +2,7 @@ const serverInput = document.getElementById('server');
 const dirInput = document.getElementById('dir');
 const selectDirBtn = document.getElementById('selectDirBtn');
 const imgNameInput = document.getElementById('imgName');
+const piciInput = document.getElementById('pici');
 const startBtn = document.getElementById('startBtn');
 const nextBtn = document.getElementById('nextBtn');
 const progressInfo = document.getElementById('progressInfo');
@@ -77,6 +78,13 @@ function displayCurrentImage(filePath) { // Removed async as readFileSync is syn
     }
 
     try {
+        const year = extractFirstYear(filePath);
+        document.getElementById('year').value = year;
+        const arr = filePath.split('\\');
+        const anjuanhao = arr.find(item => item.includes('号'));
+        document.getElementById('anjuanhao').value = anjuanhao;
+        const juanci = arr[arr.length - 2 >= 0 ? arr.length - 2 : 0];
+        document.getElementById('juanci').value = juanci;
         // Correctly call readFileSync and specify base64 encoding
         const base64Image = window.electronAPI.readFileSync(filePath, { encoding: 'base64' });
         const ext = window.electronAPI.extname(filePath).substring(1);
@@ -98,8 +106,196 @@ function displayCurrentImage(filePath) { // Removed async as readFileSync is syn
 
         // OCR can remain async
         window.electronAPI.ocr(serverInput.value, base64Image)
-            .then(result => {
-                ocrResult.textContent = JSON.stringify(result, null, 2);
+            .then(rawResults => {
+                // 1. 基于坐标范围的过滤
+                const fileNameItem = rawResults.filter(r => r.text.replace(/\s+/g, '').startsWith('文件'))?.sort((a, b) => a.box[0][1] - b.box[0][1])[0];
+                // const recordItem = rawResults.find(r => r.text.replace(/\s+/g, '').startsWith('本卷宗连面带底'));
+                const recordItem = rawResults.filter(r => r.text.replace(/\s+/g, '').startsWith('备'))?.sort((a, b) => b.box[0][1] - a.box[0][1])[0];
+
+
+                if (!fileNameItem || !recordItem) {
+                    console.log({ rawResults });
+                    ocrResult.textContent = '未找到有效的范围标记';
+                    return;
+                }
+
+                const minY = fileNameItem.box[3][1];
+                const maxY = recordItem.box[0][1];
+
+                const filtered = rawResults.filter(item =>
+                    item.box[0][1] > minY && item.box[0][1] < maxY
+                );
+
+                // 匹配文件名称和页次
+                const matched = [];
+                filtered.forEach(item => {
+                    if (/^\d+(-\d+)?$/.test(item.text)) return;
+                    if (item.text.replace(/\s+/g, '') == '备' || item.text.replace(/\s+/g, '') == '考' || item.text.replace(/\s+/g, '') == '备考' || item.text.replace(/\s+/g, '') == '备考表') {
+                        return;
+                    }
+
+                    // 获取当前项右侧X坐标
+                    const leftX = Math.min(...item.box.map(p => p[0]));
+                    // 获取当前项右侧Y坐标
+                    const leftY = Math.min(...item.box.map(p => p[1]));
+
+                    // 查找右侧最近的页次
+                    const candidates = filtered
+                        .filter(r => /^\d+(-\d+)?$/.test(r.text))
+                        .filter(r => r.box[0][0] >= item.box[2][0])
+                        .map(r => ({
+                            ...r,
+                            distance: Math.abs(r.box[0][0] - leftX) + Math.abs(r.box[0][1] - leftY)
+                        })).sort((a, b) => a.distance - b.distance);
+
+                    if (candidates.length > 0) {
+                        const pageText = candidates[0].text.replace(/\s+/g, '');
+                        const tmp = pageText.split('-');
+                        const pageNumber = parseInt(tmp[0]);
+                        const pageNumber1 = parseInt(tmp.length > 1 ? tmp[1] : tmp[0]);
+
+                        matched.push({
+                            name: item.text.replace(/\s+/g, ''),
+                            page: pageText,
+                            pageNumber: pageNumber,
+                            pageNumber1: pageNumber1,
+                            score: item.score,
+                        });
+                    }
+                });
+
+                // 排序逻辑
+                matched.sort((a, b) => a.pageNumber - b.pageNumber);
+                matched.push({
+                    name: '备考表',
+                    page: matched[matched.length - 1].pageNumber1 + 1,
+                    pageNumber: matched[matched.length - 1].pageNumber1 + 1,
+                    score: matched[matched.length - 1].pageNumber1 > 10 ? 1 : 0.5,
+                });
+
+                // 生成带样式的表格
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                console.log('init', { matched });
+
+                function rendTable() {
+                    const tableHTML = `
+                    <thead>
+                      <tr style='background:#f5f5f5'>
+                        <th>操作</th>
+                        <th>文件名称</th>
+                        <th>页次</th>
+                        <th>页次范围</th>
+                        <th>置信度</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${matched.map((item, index) => {
+                        let bgColor = '';
+                        if (item.score < 0.8) bgColor = 'critical-bg';
+                        else if (item.score < 0.9) bgColor = 'error-bg';
+                        else if (item.score < 0.95) bgColor = 'warning-bg';
+
+                        return `
+                          <tr data-index='${index}'>
+                            <td class="${bgColor}">
+                              <span class="delete-btn" data-index='${index}'>删除</span>
+                              <span class="add-btn" data-index='${index}'>添加</span>
+                            </td>
+                            <td contenteditable="true" data-index='${index}' class="${bgColor}">${item.name}</td>
+                            <td contenteditable="true" data-index='${index}' class="${bgColor}">${item.pageNumber}</td>
+                            <td contenteditable="true" data-index='${index}' class="${bgColor}">${item.page}</td>
+                            <td data-index='${index}' class="${bgColor}">${(item.score * 100).toFixed(1)}%</td>
+                          </tr>
+                        `;
+                    }).join('')}
+                    </tbody>
+                  `;
+                  table.innerHTML = tableHTML;
+                  bindEvents();
+                  ocrResult.innerHTML = '';
+                  ocrResult.appendChild(table);
+                  // 添加导出按钮事件
+                  const exportButton = document.createElement('button');
+                  exportButton.className = "export";
+                  exportButton.textContent = "导出(存储到图片统计目录)";
+                  exportButton.onclick = async () => {
+                    try {
+                      const csvContent = [
+                        '批次,年度,案卷号,卷次,卷宗目录,页次,备注',
+                        ...matched.map(item => {
+                          const escape = str => `"${String(str).replace(/"/g, '""')}"`;
+                          return [
+                            escape(piciInput.value),
+                            escape(document.getElementById('year').value),
+                            escape(document.getElementById('anjuanhao').value),
+                            escape(document.getElementById('juanci').value),
+                            escape(item.name),
+                            escape(item.pageNumber),
+                            ''
+                          ].join(',');
+                        })
+                      ].join('\n');
+                  
+                      const dirPath = window.electronAPI.dirname(filePath);
+                      const csvPath = window.electronAPI.joinPath(dirPath, 'ocr.csv');
+                      
+                      await window.electronAPI.writeFile(csvPath, csvContent);
+                      alert(`成功导出到: ${csvPath}`);
+                    } catch (err) {
+                      console.error('导出失败:', err);
+                      alert(`导出失败: ${err.message}`);
+                    }
+                  };
+                  ocrResult.appendChild(exportButton);
+
+                }
+
+                // 添加表格样式和事件监听
+                function bindEvents() {
+                    table.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.onclick = () => {
+                            const rowIndex = btn.dataset.index;
+                            matched.splice(rowIndex, 1);
+                            console.log('delete', { matched });
+                            rendTable();
+                        };
+                    });
+
+                    table.querySelectorAll('.add-btn').forEach(btn => {
+                        btn.onclick = () => {
+                            const newRow = {
+                                name: '',
+                                page: '',
+                                pageNumber: '',
+                                score: 1
+                            };
+                            const rowIndex = btn.dataset.index;
+                            matched.splice(rowIndex + 1, 0, newRow);
+                            console.log('add', { matched });
+                            rendTable();
+                        };
+                    });
+
+                    // 绑定内容修改事件
+                    table.querySelectorAll('[contenteditable]').forEach(cell => {
+                        cell.oninput = () => {
+                            const rowIndex = cell.dataset.index;
+                            let field = 'name';
+                            if (cell.cellIndex === 2) {
+                                field = 'pageNumber'
+                            }
+                            if (cell.cellIndex === 3) {
+                                field = 'page';
+                            }
+                            matched[rowIndex][field] = cell.textContent;
+                            console.log('edit', { matched });
+                        };
+                    });
+                }
+                rendTable();
+                
             })
             .catch(ocrError => {
                 console.error('OCR处理时出错:', ocrError);
@@ -118,6 +314,11 @@ function displayCurrentImage(filePath) { // Removed async as readFileSync is syn
 startBtn.addEventListener('click', () => {
     const dir = dirInput.value;
     const imgNamesStr = imgNameInput.value;
+    const piciStr = piciInput.value;
+    if (!piciStr) {
+        alert('请输入批次号');
+        return;
+    }
     if (!dir) {
         alert('请选择图片根目录。');
         return;
@@ -192,3 +393,9 @@ document.addEventListener('DOMContentLoaded', () => {
     imagePlaceholder.textContent = '请先选择图片目录并输入图片名称（多个用逗号分隔），然后点击开始。';
     nextBtn.style.display = 'none';
 });
+
+// 新增年份提取函数
+const extractFirstYear = (text) => {
+  const yearMatch = /\d{4}/.exec(text);
+  return yearMatch ? yearMatch[0] : '';
+};

@@ -14,5 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   readFileSync: (filePath, options) => fs.readFileSync(filePath, options),
   isDirectory: (filePath) => fs.statSync(filePath).isDirectory(),
   isFileSync: (filePath) => fs.statSync(filePath).isFile(),
-  ocr: ocr // Expose the ocr function
+  ocr: ocr,
+  dirname: (filePath) => path.dirname(filePath),
+  writeFile: (filePath, content) => fs.writeFileSync(filePath, content),
 });
