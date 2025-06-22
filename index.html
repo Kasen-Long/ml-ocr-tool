@@ -173,6 +173,8 @@
             height: 40px;
         }
     </style>
+    <script src="./viewer.js"></script>
+    <link href="./viewer.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -187,12 +189,13 @@
         <label for="imgName">图片名称:</label>
         <input type="text" id="imgName" value="ML.tiff">
         <button id="startBtn">开始识别</button>
+        <button id="preBtn" style="display: none;">上一张</button>
         <button id="nextBtn" style="display: none;">下一张</button>
         <div class="info" id="progressInfo"></div>
     </div>
     <div class="content">
         <div class="image-pane">
-            <h2>图片预览</h2>
+            <!-- <h2>图片预览</h2> -->
             <div id="imagePlaceholder">请先选择图片目录并开始识别</div>
             <img id="currentImage" src="" alt="当前图片" style="display: none;">
             <div class="info" id="imageInfo" style="display: none;"></div>

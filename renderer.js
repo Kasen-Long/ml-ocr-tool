@@ -4,6 +4,7 @@ const selectDirBtn = document.getElementById("selectDirBtn");
 const imgNameInput = document.getElementById("imgName");
 const piciInput = document.getElementById("pici");
 const startBtn = document.getElementById("startBtn");
+const preBtn = document.getElementById("preBtn");
 const nextBtn = document.getElementById("nextBtn");
 const progressInfo = document.getElementById("progressInfo");
 const currentImage = document.getElementById("currentImage");
@@ -17,11 +18,18 @@ let currentIndex = -1;
 const validImageExtensions = [".jpeg", ".jpg", ".png", ".tiff", ".bmp"];
 
 // Function to set the UI state for image display
+var viewer = null;
 function showImageUI(show) {
     if (show) {
-        currentImage.style.display = "block";
+        currentImage.style.display = "none";
         imageInfo.style.display = "block";
         imagePlaceholder.style.display = "none";
+        if (viewer) {
+            viewer.destroy();
+        }
+        viewer = new Viewer(currentImage, {
+            inline: true,
+        });
     } else {
         currentImage.style.display = "none";
         imageInfo.style.display = "none";
@@ -78,6 +86,7 @@ function displayCurrentImage(filePath) {
         imagePlaceholder.textContent = "没有更多图片了。";
         ocrResult.textContent = "";
         progressInfo.textContent = "";
+        preBtn.style.display = "none";
         nextBtn.style.display = "none";
         startBtn.disabled = false;
         return;
@@ -111,7 +120,8 @@ function displayCurrentImage(filePath) {
         progressInfo.textContent = `图片 ${currentIndex + 1} / ${imageFiles.length
             }`;
         ocrResult.textContent = "正在识别中...";
-        nextBtn.style.display = "inline-block"; // Show next button while processing
+        nextBtn.style.display = "inline-block";
+        preBtn.style.display = "inline-block";
 
         // OCR can remain async
         window.electronAPI
@@ -394,6 +404,7 @@ function displayCurrentImage(filePath) {
         imagePlaceholder.textContent = `加载图片失败: ${filePath}`;
         ocrResult.textContent = `错误: ${error.message}`;
         nextBtn.style.display = "inline-block"; // Allow trying next image even if current one fails
+        preBtn.style.display = "inline-block";
     }
 }
 
@@ -427,12 +438,26 @@ startBtn.addEventListener("click", () => {
             ocrResult.textContent = "";
             progressInfo.textContent = "";
             nextBtn.style.display = "none";
+            preBtn.style.display = "none";
         }
     } catch (error) {
         console.error("查找图片时出错:", error);
         showImageUI(false);
         imagePlaceholder.textContent = "查找图片时出错。";
         ocrResult.textContent = `查找图片错误: ${error.message}`;
+    }
+});
+
+preBtn.addEventListener("click", () => {
+    currentIndex--;
+    if (currentIndex >= 0) {
+        displayCurrentImage(imageFiles[currentIndex]);
+    } else {
+        showImageUI(false);
+        imagePlaceholder.textContent = "已是第一张图片。";
+        ocrResult.textContent = "";
+        progressInfo.textContent = "";
+        preBtn.style.display = "none";
     }
 });
 
