@@ -16,7 +16,7 @@ function createWindow() {
 
   win.maximize() // 添加窗口最大化命令
   win.loadFile('index.html')
-  win.webContents.openDevTools() // Uncomment to open DevTools by default
+  // win.webContents.openDevTools() // Uncomment to open DevTools by default
 }
 
 ipcMain.handle('dialog:openDirectory', async () => {
