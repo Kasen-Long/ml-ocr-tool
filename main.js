@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path'); // Import path module
 
-function createWindow () {
+function createWindow() {
   const win = new BrowserWindow({
     fullscreen: false, // 关闭全屏模式
     width: 1200,
@@ -16,7 +16,7 @@ function createWindow () {
 
   win.maximize() // 添加窗口最大化命令
   win.loadFile('index.html')
-  // win.webContents.openDevTools() // Uncomment to open DevTools by default
+  win.webContents.openDevTools() // Uncomment to open DevTools by default
 }
 
 ipcMain.handle('dialog:openDirectory', async () => {

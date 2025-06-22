@@ -36,10 +36,27 @@
             cursor: pointer;
         }
 
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-direction: row;
+        }
+
         .export {
             padding: 5px 10px;
             border: 1px solid #008800;
             background-color: #008800;
+            margin-top: 12px;
+            width: 200px;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .reset {
+            padding: 5px 10px;
+            border: 1px solid #880000;
+            background-color: #880000;
             margin-top: 12px;
             width: 200px;
             color: white;
@@ -127,7 +144,8 @@
         }
 
         .critical-bg {
-            background: purple !important;
+            background: rgb(119, 4, 119) !important;
+            color: #fff;
         }
 
         .delete-btn,
@@ -137,17 +155,18 @@
             cursor: pointer;
             display: inline;
         }
+
         #ocrResult th,
         #ocrResult tr,
         #ocrResult td {
             border: 1px solid #333;
         }
+
         #ocrResult tr td:first-child {
             display: flex;
             align-items: center;
             height: 40px;
         }
-
     </style>
 </head>
 
