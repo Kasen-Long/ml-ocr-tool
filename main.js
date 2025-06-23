@@ -1,5 +1,5 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
-const path = require('path'); // Import path module
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const path = require("path"); // Import path module
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -10,24 +10,24 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
 
-  win.maximize() // 添加窗口最大化命令
-  win.loadFile('index.html')
-  // win.webContents.openDevTools() // Uncomment to open DevTools by default
+  win.maximize(); // 添加窗口最大化命令
+  win.loadFile("index.html");
+  win.webContents.openDevTools(); // Uncomment to open DevTools by default
 }
 
-ipcMain.handle('dialog:openDirectory', async () => {
+ipcMain.handle("dialog:openDirectory", async () => {
   const focusedWindow = BrowserWindow.getFocusedWindow();
   if (!focusedWindow) {
-    console.error('dialog:openDirectory - 无可用焦点窗口');
+    console.error("dialog:openDirectory - 无可用焦点窗口");
     return null; // 或者可以抛出错误，让渲染进程捕获
   }
   try {
     const { canceled, filePaths } = await dialog.showOpenDialog(focusedWindow, {
-      properties: ['openDirectory']
+      properties: ["openDirectory"],
     });
     if (canceled || !filePaths || filePaths.length === 0) {
       return null; // 用户取消或未选择文件路径
@@ -35,23 +35,23 @@ ipcMain.handle('dialog:openDirectory', async () => {
       return filePaths[0];
     }
   } catch (error) {
-    console.error('dialog:openDirectory - 打开对话框时出错:', error);
+    console.error("dialog:openDirectory - 打开对话框时出错:", error);
     return null; // 或抛出错误
   }
 });
 
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow();
     }
-  })
-})
+  });
+});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
