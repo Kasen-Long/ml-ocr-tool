@@ -1,0 +1,20 @@
+.ant-form-item-additional {
+  display: none !important;
+}
+
+.ant-layout-sider-children {
+  height: auto !important;
+}
+
+.warning-bg {
+  background: orange !important;
+}
+
+.error-bg {
+  background: red !important;
+}
+
+.critical-bg {
+  background: rgb(119, 4, 119) !important;
+  color: #fff;
+}
