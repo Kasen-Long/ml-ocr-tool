@@ -309,6 +309,7 @@ function Content() {
       <div style={{ flex: 1, overflow: "scroll" }}>
         <Table
           className={styles.customTable}
+          rowKey={(item) => item.index}
           components={{
             body: {
               row: EditableRow,
@@ -338,7 +339,7 @@ function Content() {
                       onClick={() => {
                         const tmp = JSON.parse(JSON.stringify(data));
                         tmp.splice(index, 1);
-                        setData(tmp);
+                        setData(tmp.map((item, index) => ({ ...item, index })));
                       }}
                     >
                       删除
@@ -347,13 +348,13 @@ function Content() {
                       onClick={() => {
                         const tmp = JSON.parse(JSON.stringify(data));
                         const newRow = {
-                          name: "",
-                          page: "",
-                          pageNumber: "",
+                          name: "编辑",
+                          page: "0",
+                          pageNumber: "0",
                           score: 1,
                         };
                         tmp.splice(index + 1, 0, newRow);
-                        setData(tmp);
+                        setData(tmp.map((item, index) => ({ ...item, index })));
                       }}
                     >
                       添加
@@ -368,6 +369,7 @@ function Content() {
               width: 200,
               key: "name",
               editable: true,
+              render: (name) => (name ? name : "错误"),
             },
             {
               title: "页次",
@@ -375,6 +377,7 @@ function Content() {
               width: 60,
               key: "pageNumber",
               editable: true,
+              render: (pageNumber) => (pageNumber ? pageNumber : "错误"),
             },
             {
               title: "页次范围",
@@ -382,13 +385,15 @@ function Content() {
               dataIndex: "page",
               key: "page",
               editable: true,
+              render: (page) => (page ? page : "错误"),
             },
             {
               title: "置信度",
               width: 60,
               dataIndex: "score",
               key: "score",
-              render: (score) => (score * 100).toFixed(1) + "%",
+              render: (score) =>
+                score ? (score * 100).toFixed(1) + "%" : "错误",
             },
           ].map((col) => {
             if (!col.editable) {
