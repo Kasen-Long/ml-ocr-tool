@@ -6,7 +6,7 @@ app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors"); // 允许跨域
 app.commandLine.appendSwitch("--ignore-certificate-errors", "true"); // 忽略证书相关错误
 
-const isDev = false;
+const isDev = true;
 
 let mainWindow;
 
@@ -104,7 +104,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+  if (process?.platform !== "darwin") {
     app.quit();
   }
 });

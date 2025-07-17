@@ -67,7 +67,7 @@ function App() {
         ocr,
         setOcr,
         defaultValues: {
-          server: "http://127.0.0.1:1224",
+          server: "http://10.37.120.4:1224",
           dir: "",
         },
       }}

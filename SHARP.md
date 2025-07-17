@@ -1,3 +1,5 @@
+npm install --os=win32 --cpu=ia32 sharp@0.34.2
+
 # electron sharp
 如何基于electron forge webpack安装sharp. 
 
