@@ -1,53 +1,122 @@
-import { Image as AntdImage } from "antd";
+import { Button, Space, message } from "antd";
 import { useGlobal } from "./App";
-import { useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { UploadOutlined } from "@ant-design/icons";
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
+import { canvasPreview } from "./canvasPreview";
+
+function useDebounceEffect(fn, waitTime, deps) {
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fn.apply(undefined, deps);
+    }, waitTime);
+
+    return () => {
+      clearTimeout(t);
+    };
+  }, deps);
+}
 
 function Image() {
-  const {
-    currentIndex,
-    total,
-    imageFiles,
-    setWidth,
-    setHeight,
-    setBase64Image,
-  } = useGlobal();
-  const [url, setUrl] = useState("");
+  const { image, setImage } = useGlobal();
+  const imgRef = useRef(null);
+  const previewCanvasRef = useRef(null);
+  const [crop, setCrop] = useState();
+  const [completedCrop, setCompletedCrop] = useState();
+  const { form, setOcr } = useGlobal();
+  const server = form.getFieldValue("server");
 
-  useEffect(() => {
-    const filePath = imageFiles[currentIndex];
-    if (!filePath) {
-      return;
-    }
-    const base64Image = window.electronAPI.readFileSync(filePath, {
-      encoding: "base64",
-    });
-    const ext = window.electronAPI.extname(filePath).substring(1);
-    setUrl(`data:image/${ext};base64,${base64Image}`);
-    setBase64Image(base64Image);
-    return () => {
-      setBase64Image("");
-      setUrl("");
-    };
-  }, [currentIndex, imageFiles, setBase64Image]);
-
-  if (currentIndex >= total) {
-    return null;
+  async function handleSelectImage() {
+    // base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACiA
+    // ext: ".jpg"
+    // height: 3603
+    // name: "00002 (2).jpg"
+    // ocr: "iVBORw0KGgoAAAANSUhEUgAACiAAAA4TCAIAAADMZrt5AAAAC
+    // path: "C:/Desktop/目录/目录/00002 (2).jpg"
+    // width: 2592
+    const image = await window.electronAPI.selectImage();
+    setCrop(undefined);
+    setCompletedCrop(undefined);
+    setImage(image);
   }
 
+  function ocr(base64) {
+    if (!server) {
+      message.error("输入ocr服务器地址");
+      return;
+    }
+    window.electronAPI.ocr(server, base64).then((res) => {
+      setOcr(res);
+    });
+  }
+
+  useDebounceEffect(
+    async () => {
+      if (
+        completedCrop?.width &&
+        completedCrop?.height &&
+        imgRef.current &&
+        previewCanvasRef.current
+      ) {
+        // We use canvasPreview as it's much faster than imgPreview.
+        canvasPreview(
+          imgRef.current,
+          previewCanvasRef.current,
+          completedCrop,
+          1,
+          0
+        ).then(async (base64) => {
+          ocr(base64.split(",")[1]);
+        });
+      }
+    },
+    100,
+    [completedCrop]
+  );
+
   return (
-    <AntdImage
+    <div
       style={{
-        height: "auto",
-        maxHeight: "calc(100vh - 200px)",
-        display: "block",
+        width: "50vw",
+        height: "calc(100vh - 108px)",
+        overflow: "scroll",
       }}
-      src={url}
-      onLoad={(e) => {
-        const { naturalWidth, naturalHeight } = e.target;
-        setWidth(naturalWidth);
-        setHeight(naturalHeight);
-      }}
-    />
+    >
+      <Space direction="vertical">
+        <Space style={{ padding: "12px" }}>
+          <Button
+            type="primary"
+            icon={<UploadOutlined />}
+            onClick={handleSelectImage}
+          >
+            选择图片
+          </Button>
+          {!!completedCrop && (
+            <canvas
+              ref={previewCanvasRef}
+              style={{
+                border: "1px solid black",
+                objectFit: "contain",
+                width: completedCrop.width,
+                height: completedCrop.height,
+              }}
+            />
+          )}
+        </Space>
+        {image !== null && (
+          <div style={{ height: "100%", width: "100%", overflow: "scroll" }}>
+            <ReactCrop
+              crop={crop}
+              onChange={(_, percentCrop) => setCrop(percentCrop)}
+              onComplete={(c) => setCompletedCrop(c)}
+            >
+              <img alt="crop" preview={false} ref={imgRef} src={image.base64} />
+            </ReactCrop>
+          </div>
+        )}
+      </Space>
+    </div>
   );
 }
 

@@ -1,10 +1,9 @@
 import { useGlobal } from "./App";
 
 function Footer() {
-  const { width, height, currentIndex, imageFiles } = useGlobal();
-  const filePath = imageFiles[currentIndex] || "";
+  const { image } = useGlobal();
 
-  return `路径: ${filePath} (宽度: ${width}px, 高度: ${height}px)`;
+  return `路径: ${image?.path} (宽度: ${image?.width}px, 高度: ${image?.height}px)`;
 }
 
 export default Footer;

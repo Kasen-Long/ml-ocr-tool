@@ -1,8 +1,17 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
-const path = require("path"); // Import path module
+const { app, process, BrowserWindow, ipcMain, dialog } = require("electron");
+const path = require("path");
+const sharp = require("sharp");
+
+app.commandLine.appendSwitch("disable-web-security");
+app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors"); // 允许跨域
+app.commandLine.appendSwitch("--ignore-certificate-errors", "true"); // 忽略证书相关错误
+
+const isDev = false;
+
+let mainWindow;
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     fullscreen: false, // 关闭全屏模式
     width: 1200,
     height: 800,
@@ -14,17 +23,17 @@ function createWindow() {
     },
   });
 
-  win.maximize(); // 添加窗口最大化命令
-  const isDev = false;
+  mainWindow.maximize(); // 添加窗口最大化命令
+
   // 加载应用
   const startUrl = isDev
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, 'build/index.html')}`;
   // const startUrl = 'http://localhost:3000';
   // const startUrl = `file://${path.join(__dirname, 'build/index.html')}`
-  win.loadURL(startUrl);
+  mainWindow.loadURL(startUrl);
   if (isDev) {
-    win.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   }
 }
 
@@ -46,6 +55,41 @@ ipcMain.handle("dialog:openDirectory", async () => {
   } catch (error) {
     console.error("dialog:openDirectory - 打开对话框时出错:", error);
     return null; // 或抛出错误
+  }
+});
+
+ipcMain.handle('select-image', async () => {
+  try {
+    const result = await dialog.showOpenDialog({
+      title: '选择图片',
+      properties: ['openFile'],
+      filters: [{ name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'tif', 'tiff'] }],
+    });
+    if (result.canceled) {
+      return null;
+    }
+    const sharpInstance = sharp(result.filePaths[0], {
+      failOnError: false,
+      limitInputPixels: false,
+    }).tile({
+      size: 8192,
+    });
+    const metadata = await sharpInstance.metadata();
+    const buffer = await sharpInstance.png().toBuffer();
+    const ocr = buffer.toString('base64');
+    const base64 = `data:image/png;base64,${ocr}`;
+    return {
+      path: result.filePaths[0],
+      name: path.basename(result.filePaths[0]),
+      ext: path.extname(result.filePaths[0]),
+      base64,
+      ocr,
+      width: metadata.width,
+      height: metadata.height,
+    };
+  } catch (e) {
+    console.log(e);
+    return null;
   }
 });
 

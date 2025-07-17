@@ -17,4 +17,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   ocr: ocr,
   dirname: (filePath) => path.dirname(filePath),
   writeFile: (filePath, content) => fs.writeFileSync(filePath, content, 'utf8'),
+  selectImage: () => ipcRenderer.invoke('select-image'),
 });

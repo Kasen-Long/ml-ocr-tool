@@ -1,3 +1,5 @@
+import * as xlsx from 'xlsx';
+
 const validImageExtensions = [".jpeg", ".jpg", ".png", ".tiff", ".bmp"];
 
 export function findImages(dir, imgNamesStr) {
@@ -34,6 +36,31 @@ export function findImages(dir, imgNamesStr) {
                     .toLowerCase();
                 if (targetNamesSet.has(currentFileNameWithoutExt)) {
                     results.push(filePath);
+                }
+            }
+        }
+    });
+    return results;
+}
+
+const validTemplateExtensions = [".xls", ".xlsx"];
+
+// 查到dir下所有后缀为 xls, xlsx, csv 的文件
+export function findTemplates(dir) {
+    let results = [];
+    const list = window.electronAPI.readdirSync(dir);
+    list.forEach((file) => {
+        const filePath = window.electronAPI.joinPath(dir, file);
+        if (window.electronAPI.isDirectory(filePath)) {
+            results = results.concat(findTemplates(filePath)); // Pass original string for recursion
+        } else {
+            const currentFileExt = window.electronAPI.extname(file).toLowerCase();
+            if (validTemplateExtensions.includes(currentFileExt)) {
+                const content = window.electronAPI.readFileSync(filePath);
+                const workbook = xlsx.read(content, { type: "buffer" });
+                const value = xlsx.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]], { FS: ',', RS: '\n' }).split(/\r?\n/)?.[0] || '';
+                if (value.length) {
+                    results.push({ value: `${results.length}:${value}`, label: window.electronAPI.basename(file, currentFileExt) });
                 }
             }
         }

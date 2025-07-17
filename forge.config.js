@@ -4,7 +4,7 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    extraResource: ['build'],
+    extraResource: ['build', 'node_modules/@img'],
   },
   rebuildConfig: {},
   makers: [

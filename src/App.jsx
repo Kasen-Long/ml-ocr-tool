@@ -3,8 +3,8 @@ import { Form, Layout } from "antd";
 import { createContext, useContext, useState } from "react";
 import HeaderUI from "./Header";
 import FooterUI from "./Footer";
-import ContentUI from "./Content";
 import Image from "./Image";
+import Template from "./Template";
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -40,23 +40,13 @@ const footerStyle = {
 const context = createContext({
   defaultValues: {
     server: "http://127.0.0.1:1224",
-    pici: "CK-2025-0",
     dir: "",
-    imgName: "00002.jpg",
   },
-  total: 0,
-  setTotal: (total) => null,
-  currentIndex: 0,
-  setCurrentIndex: (index) => null,
   form: null,
-  imageFiles: [],
-  setImageFiles: () => null,
-  width: 0,
-  setWidth: (width) => null,
-  height: 0,
-  setHeight: (height) => null,
-  base64Image: "",
-  setBase64Image: (base64Image) => null,
+  image: null,
+  setImage: () => null,
+  ocr: "",
+  setOcr: () => null,
 });
 
 export const useGlobal = () => {
@@ -64,35 +54,21 @@ export const useGlobal = () => {
 };
 
 function App() {
-  const [total, setTotal] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [form] = Form.useForm();
-  const [imageFiles, setImageFiles] = useState([]);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-  const [base64Image, setBase64Image] = useState("");
+  const [image, setImage] = useState(null);
+  const [ocr, setOcr] = useState([]);
 
   return (
     <context.Provider
       value={{
-        total,
-        setTotal,
-        currentIndex,
-        setCurrentIndex,
         form,
-        imageFiles,
-        setImageFiles,
-        width,
-        setWidth,
-        height,
-        setHeight,
-        base64Image,
-        setBase64Image,
+        image,
+        setImage,
+        ocr,
+        setOcr,
         defaultValues: {
           server: "http://127.0.0.1:1224",
-          pici: "CK-2025-0",
           dir: "",
-          imgName: "00002.jpg",
         },
       }}
     >
@@ -105,7 +81,7 @@ function App() {
             <Image />
           </Sider>
           <Content>
-            <ContentUI />
+            <Template />
           </Content>
         </Layout>
         <Footer style={footerStyle}>
