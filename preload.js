@@ -16,5 +16,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isFileSync: (filePath) => fs.statSync(filePath).isFile(),
   ocr: ocr,
   dirname: (filePath) => path.dirname(filePath),
-  writeFile: (filePath, content) => fs.writeFileSync(filePath, content),
+  writeFile: (filePath, content) => fs.writeFileSync(filePath, content, 'utf8'),
 });

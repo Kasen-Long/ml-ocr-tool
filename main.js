@@ -15,14 +15,17 @@ function createWindow() {
   });
 
   win.maximize(); // 添加窗口最大化命令
+  const isDev = false;
   // 加载应用
-  // const startUrl = isDev
-  //   ? 'http://localhost:3000'
-  //   : `file://${path.join(__dirname, 'build/index.html')}`;
+  const startUrl = isDev
+    ? 'http://localhost:3000'
+    : `file://${path.join(__dirname, 'build/index.html')}`;
   // const startUrl = 'http://localhost:3000';
-  const startUrl = `file://${path.join(__dirname, 'build/index.html')}`
+  // const startUrl = `file://${path.join(__dirname, 'build/index.html')}`
   win.loadURL(startUrl);
-  // win.webContents.openDevTools();
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
 }
 
 ipcMain.handle("dialog:openDirectory", async () => {
