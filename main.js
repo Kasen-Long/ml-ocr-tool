@@ -6,7 +6,7 @@ app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors"); // 允许跨域
 app.commandLine.appendSwitch("--ignore-certificate-errors", "true"); // 忽略证书相关错误
 
-const isDev = true;
+const isDev = false;
 
 let mainWindow;
 
@@ -27,8 +27,8 @@ function createWindow() {
 
   // 加载应用
   const startUrl = isDev
-    ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, 'build/index.html')}`;
+    ? "http://localhost:3000"
+    : `file://${path.join(__dirname, "build/index.html")}`;
   // const startUrl = 'http://localhost:3000';
   // const startUrl = `file://${path.join(__dirname, 'build/index.html')}`
   mainWindow.loadURL(startUrl);
@@ -58,12 +58,14 @@ ipcMain.handle("dialog:openDirectory", async () => {
   }
 });
 
-ipcMain.handle('select-image', async () => {
+ipcMain.handle("select-image", async () => {
   try {
     const result = await dialog.showOpenDialog({
-      title: '选择图片',
-      properties: ['openFile'],
-      filters: [{ name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'tif', 'tiff'] }],
+      title: "选择图片",
+      properties: ["openFile"],
+      filters: [
+        { name: "图片文件", extensions: ["jpg", "jpeg", "png", "tif", "tiff"] },
+      ],
     });
     if (result.canceled) {
       return null;
@@ -76,12 +78,39 @@ ipcMain.handle('select-image', async () => {
     });
     const metadata = await sharpInstance.metadata();
     const buffer = await sharpInstance.png().toBuffer();
-    const ocr = buffer.toString('base64');
+    const ocr = buffer.toString("base64");
     const base64 = `data:image/png;base64,${ocr}`;
     return {
       path: result.filePaths[0],
       name: path.basename(result.filePaths[0]),
       ext: path.extname(result.filePaths[0]),
+      base64,
+      ocr,
+      width: metadata.width,
+      height: metadata.height,
+    };
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+});
+
+ipcMain.handle("deal-image", async (event, imagePath) => {
+  try {
+    const sharpInstance = sharp(imagePath, {
+      failOnError: false,
+      limitInputPixels: false,
+    }).tile({
+      size: 8192,
+    });
+    const metadata = await sharpInstance.metadata();
+    const buffer = await sharpInstance.png().toBuffer();
+    const ocr = buffer.toString("base64");
+    const base64 = `data:image/png;base64,${ocr}`;
+    return {
+      path: imagePath,
+      name: path.basename(imagePath),
+      ext: path.extname(imagePath),
       base64,
       ocr,
       width: metadata.width,

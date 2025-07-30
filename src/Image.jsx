@@ -1,10 +1,10 @@
-import { Button, Space, message } from "antd";
+import { Space, message } from "antd";
 import { useGlobal } from "./App";
 import { useRef, useState, useEffect } from "react";
-import { UploadOutlined } from "@ant-design/icons";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { canvasPreview } from "./canvasPreview";
+import Tree from "./Tree";
 
 function useDebounceEffect(fn, waitTime, deps) {
   useEffect(() => {
@@ -27,7 +27,7 @@ function Image() {
   const { form, setOcr } = useGlobal();
   const server = form.getFieldValue("server");
 
-  async function handleSelectImage() {
+  async function handleSelectImage(image) {
     // base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACiA
     // ext: ".jpg"
     // height: 3603
@@ -35,7 +35,7 @@ function Image() {
     // ocr: "iVBORw0KGgoAAAANSUhEUgAACiAAAA4TCAIAAADMZrt5AAAAC
     // path: "C:/Desktop/目录/目录/00002 (2).jpg"
     // width: 2592
-    const image = await window.electronAPI.selectImage();
+    // const image = await window.electronAPI.selectImage();
     setCrop(undefined);
     setCompletedCrop(undefined);
     setImage(image);
@@ -80,30 +80,39 @@ function Image() {
       style={{
         width: "50vw",
         height: "calc(100vh - 108px)",
-        overflow: "scroll",
+        overflow: "hidden",
+        display: "flex",
       }}
     >
-      <Space direction="vertical">
-        <Space style={{ padding: "12px" }}>
-          <Button
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          borderRight: "1px solid rgba(5,5,5,0.06)",
+        }}
+      >
+        <Tree handleSelectImage={handleSelectImage} />
+      </div>
+      <Space direction="vertical" style={{ flex: 3, overflow: "scroll" }}>
+        {/* <Button
             type="primary"
             icon={<UploadOutlined />}
             onClick={handleSelectImage}
           >
             选择图片
-          </Button>
-          {!!completedCrop && (
-            <canvas
-              ref={previewCanvasRef}
-              style={{
-                border: "1px solid black",
-                objectFit: "contain",
-                width: completedCrop.width,
-                height: completedCrop.height,
-              }}
-            />
-          )}
-        </Space>
+          </Button> */}
+        {!!completedCrop && (
+          <canvas
+            ref={previewCanvasRef}
+            style={{
+              border: "1px solid black",
+              objectFit: "contain",
+              width: completedCrop.width,
+              height: completedCrop.height,
+            }}
+          />
+        )}
         {image !== null && (
           <div style={{ height: "100%", width: "100%", overflow: "scroll" }}>
             <ReactCrop

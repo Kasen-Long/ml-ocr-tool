@@ -1,10 +1,10 @@
-const { contextBridge, ipcRenderer } = require('electron');
-const fs = require('fs');
-const path = require('path');
-const { ocr } = require('./ocr'); // Import the ocr function
+const { contextBridge, ipcRenderer } = require("electron");
+const fs = require("fs");
+const path = require("path");
+const { ocr } = require("./ocr"); // Import the ocr function
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  openDirectoryDialog: () => ipcRenderer.invoke('dialog:openDirectory'),
+contextBridge.exposeInMainWorld("electronAPI", {
+  openDirectoryDialog: () => ipcRenderer.invoke("dialog:openDirectory"),
   readdirSync: (dirPath) => fs.readdirSync(dirPath),
   statSync: (filePath) => fs.statSync(filePath),
   joinPath: (...args) => path.join(...args),
@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isFileSync: (filePath) => fs.statSync(filePath).isFile(),
   ocr: ocr,
   dirname: (filePath) => path.dirname(filePath),
-  writeFile: (filePath, content) => fs.writeFileSync(filePath, content, 'utf8'),
-  selectImage: () => ipcRenderer.invoke('select-image'),
+  writeFile: (filePath, content) => fs.writeFileSync(filePath, content, "utf8"),
+  selectImage: () => ipcRenderer.invoke("select-image"),
+  dealImage: (path) => ipcRenderer.invoke("deal-image", path),
 });
