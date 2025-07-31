@@ -89,10 +89,10 @@ function Content() {
   const { currentIndex, imageFiles, base64Image, form } = useGlobal();
   const server = form.getFieldValue("server");
   const filePath = imageFiles[currentIndex] || "";
-  const [year, setYear] = useState(extractFirstYear(filePath));
+  const [year, setYear] = useState(() => extractFirstYear(filePath));
   const arr = filePath.split(/[\\/]/);
-  const [anjuanhao, setAnjuanhao] = useState(arr.find((item) => item.includes("号")));
-  const [juanci, setJuanci] = useState(arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
+  const [anjuanhao, setAnjuanhao] = useState(() => arr.find((item) => item.includes("号")));
+  const [juanci, setJuanci] = useState(() => arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState([]);
