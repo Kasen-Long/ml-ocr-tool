@@ -89,10 +89,10 @@ function Content() {
   const { currentIndex, imageFiles, base64Image, form } = useGlobal();
   const server = form.getFieldValue("server");
   const filePath = imageFiles[currentIndex] || "";
-  const year = extractFirstYear(filePath);
+  const [year, setYear] = useState(extractFirstYear(filePath));
   const arr = filePath.split(/[\\/]/);
-  const anjuanhao = arr.find((item) => item.includes("号"));
-  const juanci = arr[arr.length - 2 >= 0 ? arr.length - 2 : 0];
+  const [anjuanhao, setAnjuanhao] = useState(arr.find((item) => item.includes("号")));
+  const [juanci, setJuanci] = useState(arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState([]);
@@ -295,9 +295,9 @@ function Content() {
   return (
     <Layout style={{ padding: 12, display: "flex", height: "100%" }}>
       <Space style={{ marginBottom: 12 }}>
-        <Input addonBefore="年度" value={year} />
-        <Input addonBefore="案卷号" value={anjuanhao} />
-        <Input addonBefore="卷次" value={juanci} />
+        <Input addonBefore="年度" value={year} onChange={(e) => setYear(e.target.value)} />
+        <Input addonBefore="案卷号" value={anjuanhao} onChange={(e) => setAnjuanhao(e.target.value)} />
+        <Input addonBefore="卷次" value={juanci} onChange={(e) => setJuanci(e.target.value)} />
         <Button color="green" variant="solid" onClick={handleExport}>
           导出(存储到图片统计目录)
         </Button>
@@ -318,11 +318,11 @@ function Content() {
           }}
           loading={loading}
           dataSource={data}
-          rowClassName={(item) => {
-            if (item.score < 0.8) return "critical-bg";
-            else if (item.score < 0.9) return "error-bg";
-            else if (item.score < 0.95) return "warning-bg";
-          }}
+          // rowClassName={(item) => {
+          //   if (item.score < 0.8) return "critical-bg";
+          //   else if (item.score < 0.9) return "error-bg";
+          //   else if (item.score < 0.95) return "warning-bg";
+          // }}
           pagination={false}
           scroll={{ y: 55 * 12 }}
           columns={[

@@ -1,8 +1,8 @@
-import { Image as AntdImage } from "antd";
 import { useGlobal } from "./App";
 import { useEffect, useState } from "react";
+import ImageWithInlineToolbar from "./ImageWithToolbar";
 
-function Image() {
+function MyImage() {
   const {
     currentIndex,
     total,
@@ -35,12 +35,7 @@ function Image() {
   }
 
   return (
-    <AntdImage
-      style={{
-        height: "auto",
-        maxHeight: "calc(100vh - 200px)",
-        display: "block",
-      }}
+    <ImageWithInlineToolbar
       src={url}
       onLoad={(e) => {
         const { naturalWidth, naturalHeight } = e.target;
@@ -49,6 +44,24 @@ function Image() {
       }}
     />
   );
+
+  // return (
+  //   <Image
+  //     style={{
+  //       height: "auto",
+  //       maxHeight: "calc(100vh - 200px)",
+  //       display: "block",
+  //       cursor: 'pointer',
+  //       transition: 'all 0.3s',
+  //     }}
+  //     src={url}
+  //     onLoad={(e) => {
+  //       const { naturalWidth, naturalHeight } = e.target;
+  //       setWidth(naturalWidth);
+  //       setHeight(naturalHeight);
+  //     }}
+  //   />
+  // );
 }
 
-export default Image;
+export default MyImage;
