@@ -98,6 +98,13 @@ function Content() {
   const [data, setData] = useState([]);
   const { styles } = useStyle();
 
+  useEffect(() => {
+    setYear(extractFirstYear(filePath));
+    const arr = filePath.split(/[\\/]/);
+    setAnjuanhao(arr.find((item) => item.includes("号")));
+    setJuanci(arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
+  }, [filePath]);
+
   const handleSave = (row) => {
     const newData = [...data];
     const index = row.index;
@@ -229,7 +236,7 @@ function Content() {
             right.push(matched[i]);
           }
         }
-        console.log({ left, right });
+        // console.log({ left, right });
         // 按y轴从小到大排序
         left.sort((a, b) => a.box[0][1] - b.box[0][1]);
         right.sort((a, b) => a.box[0][1] - b.box[0][1]);
@@ -369,7 +376,7 @@ function Content() {
               width: 200,
               key: "name",
               editable: true,
-              render: (name) => (name ? name : "错误"),
+              // render: (name) => (name ? name : "错误"),
             },
             {
               title: "页次",
@@ -377,7 +384,7 @@ function Content() {
               width: 60,
               key: "pageNumber",
               editable: true,
-              render: (pageNumber) => (pageNumber ? pageNumber : "错误"),
+              render: (pageNumber) => (isNaN(pageNumber) ? "-" : pageNumber),
             },
             {
               title: "页次范围",
@@ -385,7 +392,7 @@ function Content() {
               dataIndex: "page",
               key: "page",
               editable: true,
-              render: (page) => (page ? page : "错误"),
+              render: (page) => (isNaN(page) ? "-" : page),
             },
             {
               title: "置信度",
@@ -393,7 +400,7 @@ function Content() {
               dataIndex: "score",
               key: "score",
               render: (score) =>
-                score ? (score * 100).toFixed(1) + "%" : "错误",
+                score ? (score * 100).toFixed(1) + "%" : "-",
             },
           ].map((col) => {
             if (!col.editable) {
