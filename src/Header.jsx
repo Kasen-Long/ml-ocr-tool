@@ -1,7 +1,7 @@
-import { Form, Input, Space, Button, Progress } from "antd";
+import { Form, Input, Space, Button, Progress, message } from "antd";
 import { useGlobal } from "./App";
 import { useState } from "react";
-import { findImages } from "./utils";
+import { findImages, findOcrCsvs } from "./utils";
 
 const { Item } = Form;
 
@@ -31,6 +31,26 @@ function Header() {
     setImageFiles(files);
     setTotal(files.length);
     setCurrentIndex(0);
+  }
+
+  async function mergeOcrResults() {
+    console.log("merget ocr results");
+    const csvContents = findOcrCsvs(dir);
+    const first = csvContents[0];
+    const result = [];
+    result.push(first);
+    for (let i = 1; i < csvContents.length; i++) {
+      const current = csvContents[i];
+      const currentLines = current.split("\n");
+      for (let j = 1; j < currentLines.length; j++) {
+        const currentLine = currentLines[j];
+        result.push(currentLine);
+      }
+    }
+    const merged = result.join("\n");
+    const csvPath = `${dir}/result.csv`;
+    window.electronAPI.writeFile(csvPath, merged);
+    message.info(`成功导出到: ${csvPath}`);
   }
 
   return (
@@ -120,6 +140,12 @@ function Header() {
           showInfo={true}
           format={() => `${currentIndex + 1}/${total}`}
         />
+        <Button
+          disabled={!dir}
+          onClick={mergeOcrResults}
+        >
+          合并
+        </Button>
       </Space>
     </Form>
   );

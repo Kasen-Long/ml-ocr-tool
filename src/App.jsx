@@ -18,6 +18,8 @@ const headerStyle = {
   borderBottom: "1px solid #ccc",
   height: "40px",
   paddingTop: "4px",
+  paddingLeft: "8px",
+  paddingRight: "8px",
 };
 
 const mainStyle = {
@@ -39,7 +41,7 @@ const footerStyle = {
 
 const context = createContext({
   defaultValues: {
-    server: "http://127.0.0.1:1224",
+    server: "http://10.37.120.4:1224",
     pici: "CK-2025-0",
     dir: "",
     imgName: "00002.jpg",
@@ -89,7 +91,7 @@ function App() {
         base64Image,
         setBase64Image,
         defaultValues: {
-          server: "http://127.0.0.1:1224",
+          server: "http://10.37.120.4:1224",
           pici: "CK-2025-0",
           dir: "",
           imgName: "00002.jpg",

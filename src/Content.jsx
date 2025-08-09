@@ -78,6 +78,7 @@ const EditableCell = ({
         onClick={toggleEdit}
       >
         {children}
+        <div style={{ color: "#ccc", fontSize: 12, cursor: 'pointer' }}>点击编辑</div>
       </div>
     );
   }
@@ -89,7 +90,7 @@ function Content() {
   const { currentIndex, imageFiles, base64Image, form } = useGlobal();
   const server = form.getFieldValue("server");
   const filePath = imageFiles[currentIndex] || "";
-  const [year, setYear] = useState(() => extractFirstYear(filePath));
+  const [year, setYear] = useState(() => getYear(filePath));
   const arr = filePath.split(/[\\/]/);
   const [anjuanhao, setAnjuanhao] = useState(() => arr.find((item) => item.includes("号")));
   const [juanci, setJuanci] = useState(() => arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
@@ -98,8 +99,14 @@ function Content() {
   const [data, setData] = useState([]);
   const { styles } = useStyle();
 
+  function getYear(filePath) {
+    const arr = filePath.split(/[\\/]/);
+    const anjuanhao = arr.find((item) => item.includes("号"));
+    return extractFirstYear(anjuanhao);
+  }
+
   useEffect(() => {
-    setYear(extractFirstYear(filePath));
+    setYear(getYear(filePath));
     const arr = filePath.split(/[\\/]/);
     setAnjuanhao(arr.find((item) => item.includes("号")));
     setJuanci(arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
@@ -146,7 +153,7 @@ function Content() {
 
         if (!fileNameItem || !recordItem) {
           console.log({ rawResults });
-          setError("未找到有效的范围标记");
+          setError(`未找到有效的范围标记：${JSON.stringify({ rawResults })}`);
           setLoading(false);
           return;
         }
@@ -373,18 +380,18 @@ function Content() {
             {
               title: "文件名称",
               dataIndex: "name",
-              width: 200,
+              width: 160,
               key: "name",
               editable: true,
-              // render: (name) => (name ? name : "错误"),
+              render: (name) => name ?? "-",
             },
             {
               title: "页次",
               dataIndex: "pageNumber",
-              width: 60,
+              width: 100,
               key: "pageNumber",
               editable: true,
-              render: (pageNumber) => (isNaN(pageNumber) ? "-" : pageNumber),
+              render: (pageNumber) => pageNumber ?? "-",
             },
             {
               title: "页次范围",
@@ -392,10 +399,10 @@ function Content() {
               dataIndex: "page",
               key: "page",
               editable: true,
-              render: (page) => (isNaN(page) ? "-" : page),
+              render: (page) => page ?? "-",
             },
             {
-              title: "置信度",
+              title: "置信",
               width: 60,
               dataIndex: "score",
               key: "score",
