@@ -1,4 +1,11 @@
-const { app, process, BrowserWindow, ipcMain, dialog } = require("electron");
+const {
+  app,
+  process,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  clipboard,
+} = require("electron");
 const path = require("path");
 const sharp = require("sharp");
 
@@ -6,7 +13,7 @@ app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors"); // 允许跨域
 app.commandLine.appendSwitch("--ignore-certificate-errors", "true"); // 忽略证书相关错误
 
-const isDev = false;
+const isDev = true;
 
 let mainWindow;
 
@@ -120,6 +127,14 @@ ipcMain.handle("deal-image", async (event, imagePath) => {
     console.log(e);
     return null;
   }
+});
+
+ipcMain.handle("copy-to-clipboard", (event, text) => {
+  if (text && typeof text === "string") {
+    clipboard.writeText(text);
+    return true;
+  }
+  return false;
 });
 
 app.whenReady().then(() => {

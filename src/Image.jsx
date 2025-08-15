@@ -48,6 +48,11 @@ function Image() {
     }
     window.electronAPI.ocr(server, base64).then((res) => {
       setOcr(res);
+      const text = res
+        .filter((item) => item.text !== "")
+        .map(item => item.text)
+        .join("");
+      window.electronAPI.copyToClipboard(text);
     });
   }
 

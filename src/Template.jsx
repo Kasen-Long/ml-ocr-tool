@@ -48,13 +48,13 @@ function Template() {
       <Layout style={{ padding: 12, display: "flex", height: "100%" }}>
         <div style={{ display: "flex" }}>
           <Space direction="vertical" style={{ flex: 1 }}>
-            {ocr
-              .filter((item) => item.text !== "")
-              .map((item, index) => (
-                <Paragraph copyable style={{ fontSize: 18 }} key={index}>
-                  {item.text}
-                </Paragraph>
-              ))}
+            <Paragraph copyable style={{ fontSize: 18 }}>
+              {ocr
+                .filter((item) => item.text !== "")
+                .map(item => item.text)
+                .join("")
+              }
+            </Paragraph>
           </Space>
           <Divider type="vertical" style={{ height: "100%" }} />
           <Button color="green" variant="solid" onClick={handleExport}>

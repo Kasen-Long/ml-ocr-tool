@@ -1,5 +1,5 @@
 import { Divider, Space, Input, Button, Tree, List, Typography } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { findImagesInCurrentDir } from "./utils";
 
 const updateTreeData = (list, key, children) =>
@@ -19,10 +19,48 @@ const updateTreeData = (list, key, children) =>
     return node;
   });
 
+const flattenTree = (nodes, result = []) => {
+  nodes.forEach(node => {
+    result.push(node);
+    if (node.children && node.children.length) {
+      flattenTree(node.children, result);
+    }
+  });
+  return result;
+};
+
 function MyTree({ handleSelectImage: _handleSelectImage }) {
   const [dir, setDir] = useState("");
   const [folders, setFolders] = useState([]);
   const [images, setImages] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [expandedKeys, setExpandedKeys] = useState([]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const flatNodes = [];
+      flattenTree(folders, flatNodes);
+      const currentIndex = flatNodes.findIndex(node => node.key === selectedKeys[0]);
+      const nextIndex = (currentIndex + 1) % flatNodes.length;
+      const nextNode = flatNodes[nextIndex];
+      if (nextNode) {
+        setSelectedKeys([nextNode.key]);
+        if (nextNode.children && nextNode.children.length &&
+          !expandedKeys.includes(nextNode.key)) {
+          setExpandedKeys([...expandedKeys, nextNode.key]);
+        }
+        handleSelect(nextNode.key);
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [folders, selectedKeys, expandedKeys]);
 
   async function handleFolderSelect() {
     const dir = await window.electronAPI.openDirectoryDialog();
@@ -87,7 +125,13 @@ function MyTree({ handleSelectImage: _handleSelectImage }) {
         <Tree
           treeData={folders}
           loadData={loadData}
-          onSelect={(keys, info) => handleSelect(keys[0])}
+          onSelect={(keys, info) => {
+            setSelectedKeys(keys);
+            handleSelect(keys[0])
+          }}
+          selectedKeys={selectedKeys}
+          expandedKeys={expandedKeys}
+          onExpand={setExpandedKeys}
         />
       </div>
       <Divider />

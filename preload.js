@@ -19,4 +19,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   writeFile: (filePath, content) => fs.writeFileSync(filePath, content, "utf8"),
   selectImage: () => ipcRenderer.invoke("select-image"),
   dealImage: (path) => ipcRenderer.invoke("deal-image", path),
+  copyToClipboard: (text) => ipcRenderer.invoke("copy-to-clipboard", text),
 });
