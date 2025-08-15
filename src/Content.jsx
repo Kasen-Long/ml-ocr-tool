@@ -94,6 +94,7 @@ function Content() {
   const arr = filePath.split(/[\\/]/);
   const [anjuanhao, setAnjuanhao] = useState(() => arr.find((item) => item.includes("号")));
   const [juanci, setJuanci] = useState(() => arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
+  const [endText, setEndText] = useState('本卷宗');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [data, setData] = useState([]);
@@ -148,7 +149,8 @@ function Content() {
           ?.sort((a, b) => a.box[0][1] - b.box[0][1])[0];
         // const recordItem = rawResults.find(r => r.text.replace(/\s+/g, '').startsWith('本卷宗连面带底'));
         const recordItem = rawResults
-          .filter((r) => r.text.replace(/\s+/g, "").startsWith("备"))
+          // .filter((r) => r.text.replace(/\s+/g, "").startsWith("备"))
+          .filter((r) => r.text.replace(/\s+/g, "").startsWith(endText ?? "本卷宗"))
           ?.sort((a, b) => b.box[0][1] - a.box[0][1])[0];
 
         if (!fileNameItem || !recordItem) {
@@ -309,6 +311,9 @@ function Content() {
   return (
     <Layout style={{ padding: 12, display: "flex", height: "100%" }}>
       <Space style={{ marginBottom: 12 }}>
+        <Input addonBefore="结束标记" value={endText} onChange={(e) => setEndText(e.target.value)} />
+      </Space>
+      <Space style={{ marginBottom: 12 }}>
         <Input addonBefore="年度" value={year} onChange={(e) => setYear(e.target.value)} />
         <Input addonBefore="案卷号" value={anjuanhao} onChange={(e) => setAnjuanhao(e.target.value)} />
         <Input addonBefore="卷次" value={juanci} onChange={(e) => setJuanci(e.target.value)} />
@@ -319,7 +324,7 @@ function Content() {
           重置
         </Button>
       </Space>
-      {error && <Alert type="error" message={error} />}
+      {error && <Alert closable type="error" message={error} />}
       <div style={{ flex: 1, overflow: "scroll" }}>
         <Table
           className={styles.customTable}
