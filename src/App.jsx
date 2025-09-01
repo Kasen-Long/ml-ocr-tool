@@ -41,7 +41,7 @@ const footerStyle = {
 
 const context = createContext({
   defaultValues: {
-    server: "http://10.37.120.4:1224",
+    server: "http://127.0.0.1:1224",
     pici: "CK-2025-0",
     dir: "",
     imgName: "00002.jpg",
@@ -91,7 +91,7 @@ function App() {
         base64Image,
         setBase64Image,
         defaultValues: {
-          server: "http://10.37.120.4:1224",
+          server: "http://127.0.0.1:1224",
           pici: "CK-2025-0",
           dir: "",
           imgName: "00002.jpg",

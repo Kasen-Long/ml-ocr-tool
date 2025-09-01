@@ -94,6 +94,7 @@ function Content() {
   const arr = filePath.split(/[\\/]/);
   const [anjuanhao, setAnjuanhao] = useState(() => arr.find((item) => item.includes("号")));
   const [juanci, setJuanci] = useState(() => arr[arr.length - 2 >= 0 ? arr.length - 2 : 0]);
+  const [startText, setStartText] = useState('文件');
   const [endText, setEndText] = useState('本卷宗');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -145,12 +146,12 @@ function Content() {
       .then((rawResults) => {
         // 1. 基于坐标范围的过滤
         const fileNameItem = rawResults
-          .filter((r) => r.text.replace(/\s+/g, "").startsWith("文件"))
+          .filter((r) => r.text.replace(/[^\u4E00-\u9FA5a-zA-Z0-9]/g, "").startsWith(startText ?? "文件"))
           ?.sort((a, b) => a.box[0][1] - b.box[0][1])[0];
         // const recordItem = rawResults.find(r => r.text.replace(/\s+/g, '').startsWith('本卷宗连面带底'));
         const recordItem = rawResults
           // .filter((r) => r.text.replace(/\s+/g, "").startsWith("备"))
-          .filter((r) => r.text.replace(/\s+/g, "").startsWith(endText ?? "本卷宗"))
+          .filter((r) => r.text.replace(/[^\u4E00-\u9FA5a-zA-Z0-9]/g, "").startsWith(endText ?? "本卷宗"))
           ?.sort((a, b) => b.box[0][1] - a.box[0][1])[0];
 
         if (!fileNameItem || !recordItem) {
@@ -311,6 +312,7 @@ function Content() {
   return (
     <Layout style={{ padding: 12, display: "flex", height: "100%" }}>
       <Space style={{ marginBottom: 12 }}>
+        <Input addonBefore="开始标记" value={startText} onChange={(e) => setStartText(e.target.value)} />
         <Input addonBefore="结束标记" value={endText} onChange={(e) => setEndText(e.target.value)} />
       </Space>
       <Space style={{ marginBottom: 12 }}>

@@ -15,7 +15,7 @@ function createWindow() {
   });
 
   win.maximize(); // 添加窗口最大化命令
-  const isDev = true;
+  const isDev = false;
   // 加载应用
   const startUrl = isDev
     ? "http://localhost:3000"
